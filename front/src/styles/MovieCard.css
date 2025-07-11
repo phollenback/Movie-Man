@@ -2,12 +2,34 @@
 .movie-card {
     border: 1px solid #ddd;
     border-radius: 8px;
-    padding: 10px;
-    margin: 10px;
+    padding: 6px 8px;
+    margin: 8px 0;
     text-align: center;
+    font-size: 15px;
+    max-width: 340px;
+    width: 100%;
+    box-sizing: border-box;
   }
   
   .movie-poster {
-    width: 200px;
+    width: 120px;
+    height: 180px;
+    object-fit: cover;
     border-radius: 4px;
+    margin: 0 auto 8px auto;
+    display: block;
+  }
+  
+  .movie-poster-placeholder {
+    width: 120px;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f0f0;
+    color: #888;
+    border-radius: 4px;
+    font-size: 15px;
+    margin: 0 auto 8px auto;
+    border: 1px solid #ddd;
   }

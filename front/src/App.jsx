@@ -4,41 +4,66 @@ import Movie from './models/Movie';
 import MovieCard from './components/MovieCard';
 import SearchForm from './components/SearchForm';
 import Watchlist from './components/Watchlist';
-import LoginForm from './components/LoginForm';
 import './styles/App.css';
 
 function App() {
   const [movies, setMovies] = useState([]);
   const [watchlist, setWatchlist] = useState([]);
+  const [searchError, setSearchError] = useState('');
+  const [clientPage, setClientPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
-  const searchKey = async (keyword) => {
+  const MOVIES_PER_PAGE = 2;
+
+  const searchKey = async (keyword, page = 1) => {
     try {
-      const response = await axios.get(`http://www.omdbapi.com/?apikey=c03606c4&t=${encodeURIComponent(keyword)}`);
+      setSearchError('');
+      setLoading(true);
+      const response = await axios.get(`http://www.omdbapi.com/?apikey=c03606c4&s=${encodeURIComponent(keyword)}&page=${page}`);
       const data = response.data;
 
       if (data.Response === 'True') {
-        const movie = new Movie(
-          data.Title,
-          data.Year,
-          data.Director,
-          data.Plot,
-          data.Ratings.length > 0 ? data.Ratings[0].Value : 'N/A',
-          data.Poster
-        );
-        setMovies([movie]);
+        // Fetch full details for each movie in parallel
+        const detailPromises = data.Search.map(async (item) => {
+          const detailRes = await axios.get(`http://www.omdbapi.com/?apikey=c03606c4&i=${item.imdbID}`);
+          const detail = detailRes.data;
+          return new Movie(
+            detail.Title,
+            detail.Year,
+            detail.Director || 'N/A',
+            detail.Plot || 'N/A',
+            (detail.Ratings && detail.Ratings.length > 0 ? detail.Ratings[0].Value : (detail.imdbRating && detail.imdbRating !== 'N/A' ? detail.imdbRating : 'N/A')),
+            detail.Poster
+          );
+        });
+        const moviesList = await Promise.all(detailPromises);
+        setMovies(moviesList);
+        setClientPage(1); // Reset client page on new search
       } else {
-        console.log('Movie not found');
         setMovies([]);
+        setSearchError(data.Error || 'No results found.');
+        setClientPage(1);
       }
+      setLoading(false);
     } catch (error) {
+      setMovies([]);
+      setSearchError('Error fetching movie data.');
+      setClientPage(1);
+      setLoading(false);
       console.error('Error fetching movie data:', error);
     }
   };
 
-  const addToWatchlist = () => {
-    if (movies.length > 0) {
-      setWatchlist([...watchlist, movies[0]]);
-    }
+  // Client-side pagination controls
+  const handleClientPageChange = (page) => {
+    setClientPage(page);
+  };
+
+  const paginatedMovies = movies.slice((clientPage - 1) * MOVIES_PER_PAGE, clientPage * MOVIES_PER_PAGE);
+  const totalClientPages = Math.ceil(movies.length / MOVIES_PER_PAGE);
+
+  const addToWatchlist = (movie) => {
+    setWatchlist((prev) => [...prev, movie]);
   };
 
   const removeFromWatchlist = (index) => {
@@ -48,18 +73,36 @@ function App() {
 
   return (
     <div className="app-container">
-      <div className="movies-container">
-        {movies.map((movie) => (
-          <MovieCard key={movie.title} movie={movie} />
-        ))}
+      <div className="movies-container grid-movies">
+        {searchError && <div className="error-message">{searchError}</div>}
+        <div className="movie-grid">
+          {paginatedMovies.map((movie) => (
+            <MovieCard key={movie.title + movie.year} movie={movie} onAddToWatchlist={() => addToWatchlist(movie)} />
+          ))}
+        </div>
+        {/* Pagination at the bottom */}
+        {totalClientPages > 1 && (
+          <div className="pagination pagination-bottom">
+            {Array.from({ length: totalClientPages }, (_, i) => (
+              <button
+                key={i + 1}
+                className={clientPage === i + 1 ? 'active' : ''}
+                onClick={() => handleClientPageChange(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="search-add-container">
         <SearchForm onSearch={searchKey} />
-        <button onClick={addToWatchlist} className="add-button">
-          Add to Watchlist
-        </button>
-        <LoginForm />
+        {loading && (
+          <div className="loading-spinner-container">
+            <div className="loading-spinner"></div>
+          </div>
+        )}
       </div>
 
       <Watchlist watchlist={watchlist} onRemove={removeFromWatchlist} />
