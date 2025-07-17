@@ -1,28 +1,37 @@
-- Environment: Amazon EC2 (Amazon Linux 2)
-
-- Web Server: Apache (httpd)
+Deployment Overview
+	•	Environment: Amazon EC2 (Amazon Linux 2)
+	•	Web Server: Apache (httpd)
 
 ⸻
 
+_Most Recent Commit: Deployment to EC2_
 
-**The most recent commit demonstrates the following**
+This commit demonstrates the successful deployment of a SPA to a cloud-based production environment using AWS EC2 and Apache. This was a proof of concept that upgraded an old project in order to gain some hands on experience using key AWS services.
 
-EC2 Server Management Overview
+⸻
 
-This deployment demonstrates my ability to independently provision, configure, and manage a cloud-based production server using the following tools:
+_EC2 Server Management Overview_
 
-EC2 Instance Management
+This deployment highlights the ability to independently provision, configure, and maintain a production server using the following tools and practices:
+
+⸻
+
+_EC2 Instance Management_
 	•	Connected via SSH using a secure key pair
-	•	Maintained permissions and firewall rules via AWS Security Groups
-	•	Automated web server start with systemctl
+	•	Maintained access control using AWS Security Groups
+	•	Enabled Apache to start automatically using systemctl
 
-Apache (httpd) Setup
-	•	Installed and configured Apache as the primary web server
-	•	Enabled persistent service on reboot (systemctl enable httpd)
-	•	Deployed static site files to /var/www/html
+⸻
 
-Git-Based Deployment
+_Apache (httpd) Setup_
+	•	Installed Apache as the primary web server
+	•	Configured Apache to serve static files from /var/www/html
+	•	Enabled Apache to persist on system reboot (systemctl enable httpd)
+
+⸻
+
+_Git-Based Deployment_
 	•	Cloned the project from GitHub using Git
-	•	Pulled latest code directly into the instance
-	•	Used npm run build for frontend assets (when applicable)
-	•	Copied build output into Apache’s serving directory
+	•	Pulled the latest code directly onto the EC2 instance
+	•	Used npm run build to generate frontend assets
+	•	Deployed the compiled output into Apache’s serving directory
