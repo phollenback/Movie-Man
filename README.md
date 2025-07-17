@@ -1,5 +1,6 @@
-Environment: Amazon EC2 (Amazon Linux 2)
-Web Server: Apache (httpd)
+- Environment: Amazon EC2 (Amazon Linux 2)
+
+- Web Server: Apache (httpd)
 
 ⸻
 
