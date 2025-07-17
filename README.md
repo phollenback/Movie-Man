@@ -35,3 +35,4 @@ This deployment highlights the ability to independently provision, configure, an
 	•	Pulled the latest code directly onto the EC2 instance
 	•	Used npm run build to generate frontend assets
 	•	Deployed the compiled output into Apache’s serving directory
+<img width="1436" height="802" alt="Screenshot 2025-07-16 at 5 34 28 PM" src="https://github.com/user-attachments/assets/237d2d16-7961-406e-9f5a-1f89a3282048" />
