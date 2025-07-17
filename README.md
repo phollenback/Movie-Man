@@ -1,8 +1,9 @@
 Environment: Amazon EC2 (Amazon Linux 2)
-	•	Web Server: Apache (httpd)
-	•	Deployment Type: Static site served from Apache’s document root
+Web Server: Apache (httpd)
 
 ⸻
+
+
 **The most recent commit demonstrates the following**
 
 EC2 Server Management Overview
