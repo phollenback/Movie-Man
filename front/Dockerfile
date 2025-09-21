@@ -16,4 +16,4 @@ COPY . .
 EXPOSE 5173
 
 # Start the dev server (CRA uses 3000, Vite uses 5173)
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]
