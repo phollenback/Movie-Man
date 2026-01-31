@@ -73,6 +73,10 @@ function App() {
 
   return (
     <div className="app-container">
+      <header className="app-header">
+        <h1>Movie Man</h1>
+        <span className="deploy-badge">✓ Built & pushed via Azure DevOps pipeline</span>
+      </header>
       <div className="movies-container grid-movies">
         {searchError && <div className="error-message">{searchError}</div>}
         <div className="movie-grid">

@@ -9,10 +9,38 @@ body {
   min-height: 100vh;
 }
 
+.app-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%);
+  color: white;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 2px 8px rgba(30,58,138,0.2);
+}
+.app-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+.deploy-badge {
+  font-size: 0.85rem;
+  opacity: 0.95;
+  background: rgba(255,255,255,0.2);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
 .app-container {
+  position: relative;
   display: flex;
   flex-direction: row;
   padding: 20px;
+  padding-top: 72px;
   gap: 20px; /* Space between main components */
   overflow: hidden;
   height: 100vh;
