@@ -4,7 +4,7 @@
 
 ⸻
 
-**_Most Recent Commit: Deployment to EC2_**
+**_Most Recent Commit: Azure App Service + GitHub Actions CI/CD_**
 
 This commit demonstrates the successful deployment of a SPA to a cloud-based production environment using AWS EC2 and Apache. This was a proof of concept that upgraded an old project in order to gain some hands on experience using key AWS services.
 
