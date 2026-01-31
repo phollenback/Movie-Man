@@ -1,13 +1,18 @@
-# front/Dockerfile
-FROM node:24-alpine
+# Build stage
+FROM node:24-alpine AS build
 WORKDIR /app
 
-# Copy manifests; lockfile is optional (the * allows zero matches)
 COPY package.json package-lock.json* ./
-RUN npm install
+RUN npm ci
 
-# Copy the rest of the app
 COPY . .
+RUN npm run build
 
-EXPOSE 3000
-CMD ["npm", "start"]
+# Production stage
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY nginx/00-log-format.conf /etc/nginx/conf.d/00-log-format.conf
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
