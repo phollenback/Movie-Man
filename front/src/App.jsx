@@ -74,8 +74,14 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header">
-        <h1>Movie Man</h1>
-        <span className="deploy-badge">✓ Built & pushed via Azure DevOps pipeline</span>
+        <div className="app-header-left">
+          <h1>Movie Man</h1>
+          <nav className="repo-nav">
+            <span className="repo-badge">{process.env.REACT_APP_GIT_REPO || 'phollenback/Movie-Man'}</span>
+            <span className="branch-badge">{process.env.REACT_APP_GIT_BRANCH || 'main'}</span>
+          </nav>
+        </div>
+        <span className="deploy-badge">✓ CI/CD</span>
       </header>
       <div className="movies-container grid-movies">
         {searchError && <div className="error-message">{searchError}</div>}

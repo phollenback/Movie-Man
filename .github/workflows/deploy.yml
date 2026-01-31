@@ -39,7 +39,10 @@ jobs:
         run: |
           IMAGE_TAG=${{ github.sha }}
           IMAGE_URI=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:$IMAGE_TAG
-          docker build -t $IMAGE_URI -f front/Dockerfile front/
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          docker build -t $IMAGE_URI -f front/Dockerfile front/ \
+            --build-arg REACT_APP_GIT_REPO=${{ github.repository }} \
+            --build-arg REACT_APP_GIT_BRANCH=$BRANCH_NAME
           docker tag $IMAGE_URI ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
           docker push $IMAGE_URI
           docker push ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
