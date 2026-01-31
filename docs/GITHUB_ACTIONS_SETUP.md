@@ -94,10 +94,9 @@ The workflow needs an Azure identity to push to ACR and deploy to App Service.
 ### 2.1 Create Service Principal
 
 ```bash
-# Get your subscription ID
 SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+RESOURCE_GROUP="movie-man-rg"
 
-# Create service principal with Contributor on resource group
 az ad sp create-for-rbac \
   --name "github-movieman-deploy" \
   --role "Contributor" \
@@ -105,35 +104,39 @@ az ad sp create-for-rbac \
   --sdk-auth
 ```
 
-### 2.2 Copy the Output
+### 2.2 Extract Values
 
-The command outputs JSON. **Copy the entire JSON** (including all keys like `activeDirectoryEndpointUrl`, etc.) — you'll add it to GitHub secrets.
+From the JSON output, note these values:
+- **clientId** (or appId) → `AZURE_CLIENT_ID`
+- **clientSecret** (or password) → `AZURE_CLIENT_SECRET`
+- **subscriptionId** → `AZURE_SUBSCRIPTION_ID`
+- **tenantId** → `AZURE_TENANT_ID`
 
-> ⚠️ **Never commit this JSON to git.** Add it only as a GitHub secret.
+> ⚠️ **Never commit these values to git.**
 
 ---
 
 ## Step 3: GitHub Secrets
 
-### 3.1 Add AZURE_CREDENTIALS
+Add these **4 secrets** in your repo:
 
-1. Go to your repo: **https://github.com/phollenback/Movie-Man**
-2. **Settings** → **Secrets and variables** → **Actions**
-3. **New repository secret**
-4. Name: `AZURE_CREDENTIALS`
-5. Value: Paste the **entire JSON** from Step 2.2
+1. Go to **https://github.com/phollenback/Movie-Man** → **Settings** → **Secrets and variables** → **Actions**
+2. **New repository secret** for each:
 
-The JSON must include at least:
-```json
-{
-  "clientId": "<from create-for-rbac>",
-  "clientSecret": "<from create-for-rbac>",
-  "subscriptionId": "<your-subscription-id>",
-  "tenantId": "<your-tenant-id>"
-}
+| Secret Name | Value (from create-for-rbac output) |
+|-------------|-------------------------------------|
+| `AZURE_CLIENT_ID` | `clientId` or `appId` |
+| `AZURE_CLIENT_SECRET` | `clientSecret` or `password` |
+| `AZURE_SUBSCRIPTION_ID` | `subscriptionId` |
+| `AZURE_TENANT_ID` | `tenantId` |
+
+The workflow uses these individual secrets to avoid JSON format issues.
+
+**If the service principal already exists** and you need a new client secret:
+```bash
+az ad sp credential reset --id <clientId> --query password -o tsv
 ```
-
-Use the output of `az ad sp create-for-rbac ... --sdk-auth` for the correct format.
+Use that value for `AZURE_CLIENT_SECRET`. Get `<clientId>` from Azure Portal → Microsoft Entra ID → App registrations → your app.
 
 ---
 
