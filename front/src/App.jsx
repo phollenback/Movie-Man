@@ -78,7 +78,7 @@ function App() {
           <h1>Movie Man</h1>
           <nav className="repo-nav">
             <span className="repo-badge">{process.env.REACT_APP_GIT_REPO || 'phollenback/Movie-Man'}</span>
-            <span className="branch-badge">{process.env.REACT_APP_GIT_BRANCH || 'main'}</span>Pushed from my  linux in my basement.
+            <span className="branch-badge">{process.env.REACT_APP_GIT_BRANCH || 'main'}</span>
           </nav>
         </div>
         <span className="deploy-badge">✓ CI/CD</span>

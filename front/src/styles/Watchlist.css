@@ -1,51 +1,57 @@
 .watchlist-container {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 10px;
-  width: 100%;
-  max-width: 400px;
-  max-height: 600px; /* Ensure max-height is set */
-  overflow-y: auto; /* Ensure vertical scrolling is enabled */
-  overflow-x: hidden; /* Prevent horizontal overflow */
+  border: 1px solid #e0e0e0;
+  padding: 16px;
+  background: #fff;
+  max-height: 400px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-.watchlist-index {
-  font-weight: bold;
+@media (min-width: 768px) {
+  .watchlist-container {
+    max-height: 500px;
+    width: 100%;
+    max-width: 320px;
+  }
 }
 
 .watchlist-item {
-  margin-bottom: 10px;
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-  display: flex;
-  flex-direction: column;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.watchlist-item:last-child {
+  border-bottom: none;
 }
 
 .watchlist-title {
-  font-weight: bold;
+  font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .watchlist-plot {
-  font-size: 0.9em;
+  font-size: 0.85rem;
+  color: #555;
+  margin-top: 4px;
 }
 
 .watchlist-rating {
-  display: block;
-  margin-bottom: 5px;
-  font-size: 14px;
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 4px;
 }
 
 .remove-button {
-  padding: 5px 10px;
-  font-size: 12px;
-  margin-top: 5px;
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  background: #fff;
+  color: #b00;
+  border: 1px solid #d0a0a0;
   cursor: pointer;
+  min-height: 36px;
 }
 
 .remove-button:hover {
-  background-color: #d32f2f;
+  background: #fff5f5;
 }

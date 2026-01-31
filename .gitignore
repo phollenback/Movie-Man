@@ -12,6 +12,10 @@ secrets/
 *.swp
 *.swo
 
+# Cursor (local only)
+.cursorrules
+.cursor/
+
 # OS
 .DS_Store
 Thumbs.db

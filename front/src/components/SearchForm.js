@@ -31,8 +31,7 @@ const SearchForm = ({ onSearch }) => {
       </button>
       <button
         type="button"
-        className="search-button"
-        style={{ background: '#f44336', color: '#fff', marginLeft: 5 }}
+        className="search-button search-button-clear"
         onClick={handleClear}
       >
         Clear
