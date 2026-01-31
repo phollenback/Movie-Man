@@ -19,13 +19,13 @@ function App() {
     try {
       setSearchError('');
       setLoading(true);
-      const response = await axios.get(`http://www.omdbapi.com/?apikey=c03606c4&s=${encodeURIComponent(keyword)}&page=${page}`);
+      const response = await axios.get(`https://www.omdbapi.com/?apikey=c03606c4&s=${encodeURIComponent(keyword)}&page=${page}`);
       const data = response.data;
 
       if (data.Response === 'True') {
         // Fetch full details for each movie in parallel
         const detailPromises = data.Search.map(async (item) => {
-          const detailRes = await axios.get(`http://www.omdbapi.com/?apikey=c03606c4&i=${item.imdbID}`);
+          const detailRes = await axios.get(`https://www.omdbapi.com/?apikey=c03606c4&i=${item.imdbID}`);
           const detail = detailRes.data;
           return new Movie(
             detail.Title,
