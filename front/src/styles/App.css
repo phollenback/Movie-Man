@@ -102,6 +102,43 @@ body {
   }
 }
 
+.movies-toolbar {
+  margin-bottom: 12px;
+}
+
+.view-toggle {
+  display: inline-flex;
+  gap: 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 2px;
+}
+
+.view-toggle button {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  border: none;
+  background: #fff;
+  cursor: pointer;
+  min-height: 36px;
+}
+
+.view-toggle button:not(:last-child) {
+  border-right: 1px solid #e0e0e0;
+}
+
+.view-toggle button:hover {
+  background: #f5f5f5;
+}
+
+.view-toggle button.active {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.view-toggle button.active:hover {
+  background: #444;
+}
+
 .pagination-bottom {
   margin-top: auto;
   padding-top: 12px;
@@ -216,6 +253,21 @@ body {
   .movie-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+.movie-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 60px;
+}
+
+.movie-list .movie-card {
+  border-radius: 0;
+}
+
+.movie-list .movie-card:not(:last-child) {
+  border-bottom: none;
 }
 
 .loading-spinner-container {

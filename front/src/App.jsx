@@ -12,6 +12,7 @@ function App() {
   const [searchError, setSearchError] = useState('');
   const [clientPage, setClientPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [viewMode, setViewMode] = useState('grid');
 
   const MOVIES_PER_PAGE = 2;
 
@@ -83,11 +84,36 @@ function App() {
         </div>
         <span className="deploy-badge">✓ CI/CD</span>
       </header>
-      <div className="movies-container grid-movies">
+      <div className="movies-container">
+        <div className="movies-toolbar">
+          <span className="view-toggle">
+            <button
+              type="button"
+              className={viewMode === 'grid' ? 'active' : ''}
+              onClick={() => setViewMode('grid')}
+              aria-pressed={viewMode === 'grid'}
+            >
+              Grid
+            </button>
+            <button
+              type="button"
+              className={viewMode === 'list' ? 'active' : ''}
+              onClick={() => setViewMode('list')}
+              aria-pressed={viewMode === 'list'}
+            >
+              List
+            </button>
+          </span>
+        </div>
         {searchError && <div className="error-message">{searchError}</div>}
-        <div className="movie-grid">
+        <div className={viewMode === 'grid' ? 'movie-grid' : 'movie-list'}>
           {paginatedMovies.map((movie) => (
-            <MovieCard key={movie.title + movie.year} movie={movie} onAddToWatchlist={() => addToWatchlist(movie)} />
+            <MovieCard
+              key={movie.title + movie.year}
+              movie={movie}
+              layout={viewMode}
+              onAddToWatchlist={() => addToWatchlist(movie)}
+            />
           ))}
         </div>
         {/* Pagination at the bottom */}

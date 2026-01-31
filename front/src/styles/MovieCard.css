@@ -29,3 +29,78 @@
   margin: 0 auto 12px;
   border: 1px solid #e0e0e0;
 }
+
+.movie-card-body {
+  margin-top: 0;
+}
+
+.movie-card-title {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.movie-card-meta {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.movie-card-plot {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.movie-card-no-plot {
+  color: #888;
+}
+
+/* List layout: row with poster left, details right */
+.movie-card--list {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  padding: 12px 16px;
+  align-items: flex-start;
+}
+
+.movie-card--list .movie-poster,
+.movie-card--list .movie-poster-placeholder {
+  width: 64px;
+  max-width: 64px;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.movie-card--list .movie-poster-placeholder {
+  aspect-ratio: 2/3;
+  min-height: 96px;
+}
+
+.movie-card--list .movie-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.movie-card--list .movie-card-title {
+  font-size: 0.95rem;
+}
+
+.movie-card--list .movie-card-plot {
+  display: none;
+}
+
+.add-button-inline {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  background: #2a2a2a;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.add-button-inline:hover {
+  background: #444;
+}
