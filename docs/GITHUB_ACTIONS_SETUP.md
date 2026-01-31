@@ -116,27 +116,37 @@ From the JSON output, note these values:
 
 ---
 
-## Step 3: GitHub Secrets
+## Step 3: GitHub Secret
 
-Add these **4 secrets** in your repo:
+Add **one secret** named `AZURE_CREDENTIALS`:
 
 1. Go to **https://github.com/phollenback/Movie-Man** → **Settings** → **Secrets and variables** → **Actions**
-2. **New repository secret** for each:
+2. **New repository secret**
+3. Name: `AZURE_CREDENTIALS`
+4. Value: Paste this JSON (replace the placeholder values):
 
-| Secret Name | Value (from create-for-rbac output) |
-|-------------|-------------------------------------|
-| `AZURE_CLIENT_ID` | `clientId` or `appId` |
-| `AZURE_CLIENT_SECRET` | `clientSecret` or `password` |
-| `AZURE_SUBSCRIPTION_ID` | `subscriptionId` |
-| `AZURE_TENANT_ID` | `tenantId` |
-
-The workflow uses these individual secrets to avoid JSON format issues.
-
-**If the service principal already exists** and you need a new client secret:
-```bash
-az ad sp credential reset --id <clientId> --query password -o tsv
+```json
+{"clientId":"<your-client-id>","clientSecret":"<your-client-secret>","subscriptionId":"<your-subscription-id>","tenantId":"<your-tenant-id>"}
 ```
-Use that value for `AZURE_CLIENT_SECRET`. Get `<clientId>` from Azure Portal → Microsoft Entra ID → App registrations → your app.
+
+**Important:** Use the exact keys `clientId`, `clientSecret`, `subscriptionId`, `tenantId` (case-sensitive).  
+If `az ad sp create-for-rbac --sdk-auth` outputs `appId` instead of `clientId`, rename it to `clientId`.
+
+**To get/create values:**
+```bash
+# Run this and copy the output, then fix key names if needed:
+az ad sp create-for-rbac --name "github-movieman-deploy" \
+  --role "Contributor" \
+  --scopes /subscriptions/$(az account show --query id -o tsv)/resourceGroups/movie-man-rg \
+  --sdk-auth
+```
+
+If the service principal exists and you need a new secret:
+```bash
+NEW_SECRET=$(az ad sp credential reset --id <clientId> --query password -o tsv)
+echo "Use this for clientSecret: $NEW_SECRET"
+```
+Then build the JSON with clientId, this secret, subscriptionId, and tenantId.
 
 ---
 
