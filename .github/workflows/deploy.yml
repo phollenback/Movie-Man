@@ -1,0 +1,56 @@
+# Deploy dev-azure to Azure App Service (movieman)
+# Trigger: push to dev-azure branch
+# Builds Docker image, pushes to ACR, deploys to App Service
+
+name: Deploy to Azure App Service
+
+on:
+  push:
+    branches:
+      - dev-azure
+
+env:
+  AZURE_WEBAPP_NAME: movieman
+  RESOURCE_GROUP: movie-man-rg
+  ACR_NAME: moviemanacr
+  IMAGE_NAME: movie-man-front
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Log in to ACR
+        run: |
+          az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          IMAGE_URI=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:$IMAGE_TAG
+          docker build -t $IMAGE_URI -f front/Dockerfile front/
+          docker tag $IMAGE_URI ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+          docker push $IMAGE_URI
+          docker push ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+
+      - name: Deploy to App Service
+        run: |
+          IMAGE_URI=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          az webapp config container set \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --docker-custom-image-name $IMAGE_URI
+          az webapp restart \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }}
