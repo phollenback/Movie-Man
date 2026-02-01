@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useIsAuthenticated } from '@azure/msal-react';
 import axios from 'axios';
 import Movie from './models/Movie';
 import MovieCard from './components/MovieCard';
@@ -6,6 +7,7 @@ import SearchForm from './components/SearchForm';
 import Watchlist from './components/Watchlist';
 import LogScreen from './components/LogScreen';
 import LogMovieForm from './components/LogMovieForm';
+import AuthButton from './components/AuthButton';
 import './styles/App.css';
 
 function movieKey(movie) {
@@ -13,6 +15,7 @@ function movieKey(movie) {
 }
 
 function App() {
+  const isAuthenticated = useIsAuthenticated();
   const [movies, setMovies] = useState([]);
   const [watchlist, setWatchlist] = useState([]);
   const [watched, setWatched] = useState([]);
@@ -29,12 +32,13 @@ function App() {
     try {
       setSearchError('');
       setLoading(true);
-      const response = await axios.get(`https://www.omdbapi.com/?apikey=c03606c4&s=${encodeURIComponent(keyword)}&page=${page}`);
+      const apiKey = process.env.REACT_APP_OMDB_API_KEY || '';
+      const response = await axios.get(`https://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(keyword)}&page=${page}`);
       const data = response.data;
 
       if (data.Response === 'True') {
         const detailPromises = data.Search.map(async (item) => {
-          const detailRes = await axios.get(`https://www.omdbapi.com/?apikey=c03606c4&i=${item.imdbID}`);
+          const detailRes = await axios.get(`https://www.omdbapi.com/?apikey=${apiKey}&i=${item.imdbID}`);
           const detail = detailRes.data;
           return new Movie(
             detail.Title,
@@ -102,33 +106,39 @@ function App() {
       <header className="app-header">
         <div className="app-header-left">
           <h1>Movie Man</h1>
-          <nav className="main-nav">
-            <button
-              type="button"
-              className={activeTab === 'search' ? 'active' : ''}
-              onClick={() => setActiveTab('search')}
-            >
-              Search
-            </button>
-            <button
-              type="button"
-              className={activeTab === 'watchlist' ? 'active' : ''}
-              onClick={() => setActiveTab('watchlist')}
-            >
-              Watchlist {watchlist.length > 0 && `(${watchlist.length})`}
-            </button>
-            <button
-              type="button"
-              className={activeTab === 'log' ? 'active' : ''}
-              onClick={() => setActiveTab('log')}
-            >
-              Log {watched.length > 0 && ` (${watched.length})`}
-            </button>
-          </nav>
+          {isAuthenticated && (
+            <nav className="main-nav">
+              <button
+                type="button"
+                className={activeTab === 'search' ? 'active' : ''}
+                onClick={() => setActiveTab('search')}
+              >
+                Search
+              </button>
+              <button
+                type="button"
+                className={activeTab === 'watchlist' ? 'active' : ''}
+                onClick={() => setActiveTab('watchlist')}
+              >
+                Watchlist {watchlist.length > 0 && `(${watchlist.length})`}
+              </button>
+              <button
+                type="button"
+                className={activeTab === 'log' ? 'active' : ''}
+                onClick={() => setActiveTab('log')}
+              >
+                Log {watched.length > 0 && ` (${watched.length})`}
+              </button>
+            </nav>
+          )}
+        </div>
+        <div className="app-header-right">
+          <AuthButton />
         </div>
       </header>
 
       <div className="app-main">
+        {isAuthenticated ? (
         <div className="movies-container">
           <div className="movies-toolbar">
             <span className="view-toggle">
@@ -207,6 +217,11 @@ function App() {
             />
           )}
         </div>
+        ) : (
+          <div className="auth-prompt">
+            <p>Sign in with Microsoft to search movies, manage your watchlist, and log what you&apos;ve watched.</p>
+          </div>
+        )}
       </div>
 
       {loggingMovie && (

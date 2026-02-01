@@ -42,7 +42,11 @@ jobs:
           BRANCH_NAME=${GITHUB_REF#refs/heads/}
           docker build -t $IMAGE_URI -f front/Dockerfile front/ \
             --build-arg REACT_APP_GIT_REPO=${{ github.repository }} \
-            --build-arg REACT_APP_GIT_BRANCH=$BRANCH_NAME
+            --build-arg REACT_APP_GIT_BRANCH=$BRANCH_NAME \
+            --build-arg REACT_APP_ENTRA_CLIENT_ID=${{ secrets.ENTRA_CLIENT_ID }} \
+            --build-arg REACT_APP_ENTRA_TENANT_ID=${{ secrets.ENTRA_TENANT_ID || 'common' }} \
+            --build-arg REACT_APP_REDIRECT_URI=https://movieman.azurewebsites.net \
+            --build-arg REACT_APP_OMDB_API_KEY=${{ secrets.OMDB_API_KEY }}
           docker tag $IMAGE_URI ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
           docker push $IMAGE_URI
           docker push ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
