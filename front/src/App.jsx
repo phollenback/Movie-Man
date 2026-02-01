@@ -4,17 +4,26 @@ import Movie from './models/Movie';
 import MovieCard from './components/MovieCard';
 import SearchForm from './components/SearchForm';
 import Watchlist from './components/Watchlist';
+import LogScreen from './components/LogScreen';
+import LogMovieForm from './components/LogMovieForm';
 import './styles/App.css';
+
+function movieKey(movie) {
+  return `${movie.title || ''}-${movie.year || ''}`;
+}
 
 function App() {
   const [movies, setMovies] = useState([]);
   const [watchlist, setWatchlist] = useState([]);
+  const [watched, setWatched] = useState([]);
   const [searchError, setSearchError] = useState('');
   const [clientPage, setClientPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
+  const [activeTab, setActiveTab] = useState('search');
+  const [loggingMovie, setLoggingMovie] = useState(null);
 
-  const MOVIES_PER_PAGE = 2;
+  const moviesPerPage = viewMode === 'list' ? 12 : 8;
 
   const searchKey = async (keyword, page = 1) => {
     try {
@@ -24,7 +33,6 @@ function App() {
       const data = response.data;
 
       if (data.Response === 'True') {
-        // Fetch full details for each movie in parallel
         const detailPromises = data.Search.map(async (item) => {
           const detailRes = await axios.get(`https://www.omdbapi.com/?apikey=c03606c4&i=${item.imdbID}`);
           const detail = detailRes.data;
@@ -39,7 +47,7 @@ function App() {
         });
         const moviesList = await Promise.all(detailPromises);
         setMovies(moviesList);
-        setClientPage(1); // Reset client page on new search
+        setClientPage(1);
       } else {
         setMovies([]);
         setSearchError(data.Error || 'No results found.');
@@ -55,93 +63,159 @@ function App() {
     }
   };
 
-  // Client-side pagination controls
   const handleClientPageChange = (page) => {
     setClientPage(page);
   };
 
-  const paginatedMovies = movies.slice((clientPage - 1) * MOVIES_PER_PAGE, clientPage * MOVIES_PER_PAGE);
-  const totalClientPages = Math.ceil(movies.length / MOVIES_PER_PAGE);
+  const paginatedMovies = movies.slice((clientPage - 1) * moviesPerPage, clientPage * moviesPerPage);
+  const totalClientPages = Math.ceil(movies.length / moviesPerPage);
 
   const addToWatchlist = (movie) => {
+    if (watchlist.some((m) => movieKey(m) === movieKey(movie))) return;
     setWatchlist((prev) => [...prev, movie]);
   };
 
   const removeFromWatchlist = (index) => {
-    const updatedWatchlist = watchlist.filter((_, i) => i !== index);
-    setWatchlist(updatedWatchlist);
+    setWatchlist((prev) => prev.filter((_, i) => i !== index));
   };
+
+  const logMovie = (movie, logData = {}) => {
+    if (watched.some((e) => movieKey(e.movie) === movieKey(movie))) return;
+    setWatched((prev) => [{ movie, comment: logData.comment, userRating: logData.userRating }, ...prev]);
+    setWatchlist((prev) => prev.filter((m) => movieKey(m) !== movieKey(movie)));
+    setLoggingMovie(null);
+  };
+
+  const handleLogSubmit = (logData) => {
+    if (loggingMovie) logMovie(loggingMovie, logData);
+  };
+
+  const removeFromLog = (index) => {
+    setWatched((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const isWatched = (movie) => watched.some((e) => movieKey(e.movie) === movieKey(movie));
+  const isInWatchlist = (movie) => watchlist.some((m) => movieKey(m) === movieKey(movie));
 
   return (
     <div className="app-container">
       <header className="app-header">
         <div className="app-header-left">
           <h1>Movie Man</h1>
-          <nav className="repo-nav">
-            <span className="repo-badge">{process.env.REACT_APP_GIT_REPO || 'phollenback/Movie-Man'}</span>
-            <span className="branch-badge">{process.env.REACT_APP_GIT_BRANCH || 'main'}</span>
+          <nav className="main-nav">
+            <button
+              type="button"
+              className={activeTab === 'search' ? 'active' : ''}
+              onClick={() => setActiveTab('search')}
+            >
+              Search
+            </button>
+            <button
+              type="button"
+              className={activeTab === 'watchlist' ? 'active' : ''}
+              onClick={() => setActiveTab('watchlist')}
+            >
+              Watchlist {watchlist.length > 0 && `(${watchlist.length})`}
+            </button>
+            <button
+              type="button"
+              className={activeTab === 'log' ? 'active' : ''}
+              onClick={() => setActiveTab('log')}
+            >
+              Log {watched.length > 0 && ` (${watched.length})`}
+            </button>
           </nav>
         </div>
-        <span className="deploy-badge">✓ CI/CD</span>
       </header>
-      <div className="movies-container">
-        <div className="movies-toolbar">
-          <span className="view-toggle">
-            <button
-              type="button"
-              className={viewMode === 'grid' ? 'active' : ''}
-              onClick={() => setViewMode('grid')}
-              aria-pressed={viewMode === 'grid'}
-            >
-              Grid
-            </button>
-            <button
-              type="button"
-              className={viewMode === 'list' ? 'active' : ''}
-              onClick={() => setViewMode('list')}
-              aria-pressed={viewMode === 'list'}
-            >
-              List
-            </button>
-          </span>
-        </div>
-        {searchError && <div className="error-message">{searchError}</div>}
-        <div className={viewMode === 'grid' ? 'movie-grid' : 'movie-list'}>
-          {paginatedMovies.map((movie) => (
-            <MovieCard
-              key={movie.title + movie.year}
-              movie={movie}
-              layout={viewMode}
-              onAddToWatchlist={() => addToWatchlist(movie)}
-            />
-          ))}
-        </div>
-        {/* Pagination at the bottom */}
-        {totalClientPages > 1 && (
-          <div className="pagination pagination-bottom">
-            {Array.from({ length: totalClientPages }, (_, i) => (
+
+      <div className="app-main">
+        <div className="movies-container">
+          <div className="movies-toolbar">
+            <span className="view-toggle">
               <button
-                key={i + 1}
-                className={clientPage === i + 1 ? 'active' : ''}
-                onClick={() => handleClientPageChange(i + 1)}
+                type="button"
+                className={viewMode === 'grid' ? 'active' : ''}
+                onClick={() => setViewMode('grid')}
+                aria-pressed={viewMode === 'grid'}
               >
-                {i + 1}
+                Grid
               </button>
-            ))}
+              <button
+                type="button"
+                className={viewMode === 'list' ? 'active' : ''}
+                onClick={() => setViewMode('list')}
+                aria-pressed={viewMode === 'list'}
+              >
+                List
+              </button>
+            </span>
           </div>
-        )}
+
+          {activeTab === 'search' && (
+            <>
+              <div className="search-inline">
+                <SearchForm onSearch={searchKey} />
+              </div>
+              {loading && (
+                <div className="loading-spinner-container">
+                  <div className="loading-spinner" />
+                </div>
+              )}
+              {searchError && <div className="error-message">{searchError}</div>}
+              <div className={viewMode === 'grid' ? 'movie-grid' : 'movie-list'}>
+                {paginatedMovies.map((movie) => (
+                  <MovieCard
+                    key={movieKey(movie)}
+                    movie={movie}
+                    layout={viewMode}
+                    onAddToWatchlist={!isInWatchlist(movie) ? () => addToWatchlist(movie) : null}
+                    onLog={!isWatched(movie) ? () => setLoggingMovie(movie) : null}
+                  />
+                ))}
+              </div>
+              {totalClientPages > 1 && (
+                <div className="pagination pagination-bottom">
+                  {Array.from({ length: totalClientPages }, (_, i) => (
+                    <button
+                      key={i + 1}
+                      type="button"
+                      className={clientPage === i + 1 ? 'active' : ''}
+                      onClick={() => handleClientPageChange(i + 1)}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {activeTab === 'watchlist' && (
+            <Watchlist
+              watchlist={watchlist}
+              layout={viewMode}
+              onRemove={removeFromWatchlist}
+              onLog={(movie) => setLoggingMovie(movie)}
+            />
+          )}
+
+          {activeTab === 'log' && (
+            <LogScreen
+              watched={watched}
+              layout={viewMode}
+              onRemove={removeFromLog}
+            />
+          )}
+        </div>
       </div>
 
-      <div className="search-add-container">
-        <SearchForm onSearch={searchKey} />
-        {loading && (
-          <div className="loading-spinner-container">
-            <div className="loading-spinner"></div>
-          </div>
-        )}
-      </div>
-
-      <Watchlist watchlist={watchlist} onRemove={removeFromWatchlist} />
+      {loggingMovie && (
+        <LogMovieForm
+          movie={loggingMovie}
+          onSubmit={handleLogSubmit}
+          onCancel={() => setLoggingMovie(null)}
+        />
+      )}
     </div>
   );
 }

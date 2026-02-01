@@ -1,0 +1,46 @@
+.log-screen--empty {
+  padding: 48px 24px;
+  text-align: center;
+  color: #666;
+}
+
+.log-entry-meta {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #eee;
+}
+
+.log-entry-rating {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.log-entry-comment {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: #444;
+  line-height: 1.4;
+}
+
+.log-remove-button {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  background: #fff;
+  color: #b00;
+  border: 1px solid #d0a0a0;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.log-remove-button:hover {
+  background: #fff5f5;
+}
+
+.movie-grid .log-entry {
+  border: 1px solid #e0e0e0;
+  padding: 12px;
+}
+
+.movie-grid .log-entry .log-remove-button {
+  margin-top: 8px;
+}

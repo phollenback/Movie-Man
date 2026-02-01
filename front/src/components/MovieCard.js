@@ -1,12 +1,13 @@
 import React from 'react';
 import '../styles/MovieCard.css';
 
-const MovieCard = ({ movie, layout = 'grid', onAddToWatchlist }) => {
+const MovieCard = ({ movie, layout = 'grid', onAddToWatchlist, onLog }) => {
   const isList = layout === 'list';
+  const hasActions = onAddToWatchlist || onLog;
   return (
     <div className={`movie-card ${isList ? 'movie-card--list' : ''}`}>
       {movie.poster && movie.poster !== 'N/A' ? (
-        <img src={movie.poster} alt={movie.title} className="movie-poster" />
+        <img src={movie.poster} alt={movie.title || 'Movie'} className="movie-poster" />
       ) : (
         <div className="movie-poster movie-poster-placeholder">No Image</div>
       )}
@@ -20,10 +21,19 @@ const MovieCard = ({ movie, layout = 'grid', onAddToWatchlist }) => {
             {movie.plot && movie.plot !== 'N/A' ? movie.plot : <span className="movie-card-no-plot">No plot available.</span>}
           </p>
         )}
-        {onAddToWatchlist && (
-          <button className={isList ? 'add-button-inline' : 'add-button-large'} onClick={onAddToWatchlist}>
-            Add to Watchlist
-          </button>
+        {hasActions && (
+          <div className="movie-card-actions">
+            {onAddToWatchlist && (
+              <button className={isList ? 'add-button-inline' : 'add-button-large'} onClick={onAddToWatchlist}>
+                Add to Watchlist
+              </button>
+            )}
+            {onLog && (
+              <button className={isList ? 'log-button-inline' : 'log-button'} onClick={onLog}>
+                Log
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>

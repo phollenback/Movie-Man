@@ -1,57 +1,46 @@
-.watchlist-container {
-  border: 1px solid #e0e0e0;
-  padding: 16px;
-  background: #fff;
-  max-height: 400px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-@media (min-width: 768px) {
-  .watchlist-container {
-    max-height: 500px;
-    width: 100%;
-    max-width: 320px;
-  }
-}
-
-.watchlist-item {
-  padding: 12px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.watchlist-item:last-child {
-  border-bottom: none;
-}
-
-.watchlist-title {
-  font-weight: 500;
-  font-size: 0.95rem;
-}
-
-.watchlist-plot {
-  font-size: 0.85rem;
-  color: #555;
-  margin-top: 4px;
-}
-
-.watchlist-rating {
-  font-size: 0.8rem;
+.watchlist-empty {
+  padding: 48px 24px;
+  text-align: center;
   color: #666;
-  margin-top: 4px;
 }
 
-.remove-button {
-  margin-top: 8px;
-  padding: 8px 12px;
+.watchlist-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.watchlist-log-button {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  background: #555;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.watchlist-log-button:hover {
+  background: #666;
+}
+
+.watchlist-remove-button {
+  padding: 8px 14px;
   font-size: 0.85rem;
   background: #fff;
   color: #b00;
   border: 1px solid #d0a0a0;
   cursor: pointer;
-  min-height: 36px;
 }
 
-.remove-button:hover {
+.watchlist-remove-button:hover {
   background: #fff5f5;
+}
+
+.movie-grid .watchlist-entry {
+  border: 1px solid #e0e0e0;
+  padding: 12px;
+}
+
+.movie-grid .watchlist-entry .watchlist-actions {
+  margin-top: 8px;
 }

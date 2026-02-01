@@ -1,30 +1,44 @@
 import React from 'react';
+import MovieCard from './MovieCard';
 import '../styles/Watchlist.css';
 
-const Watchlist = ({ watchlist, onRemove }) => {
+function movieKey(movie) {
+  return `${movie.title || ''}-${movie.year || ''}`;
+}
+
+const Watchlist = ({ watchlist, layout, onRemove, onLog }) => {
+  if (watchlist.length === 0) {
+    return (
+      <div className="watchlist-empty">
+        <p>Nothing on your watchlist. Search for movies and add them.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="watchlist-container">
-      <h2>Watchlist</h2>
-      {watchlist.length === 0 ? (
-        <p>No movies added yet.</p>
-      ) : (
-        <div>
-          {watchlist.map((movie, index) => (
-            <div key={index} className="watchlist-item">
-              <span className="watchlist-index">{index + 1}.</span>
-              <span className="watchlist-title"><strong>Title:</strong> {movie.title}</span>
-              <span className="watchlist-rating"><strong>Rating:</strong> {movie.rating}</span>
-              <p className="watchlist-plot"><strong>Plot:</strong> {movie.plot}</p>
-              <button
-                className="remove-button"
-                onClick={() => onRemove(index)}
-              >
+    <div className="watchlist-view">
+      <div className={layout === 'grid' ? 'movie-grid' : 'movie-list'}>
+        {watchlist.map((movie, index) => (
+          <div key={movieKey(movie)} className="watchlist-entry">
+            <MovieCard
+              movie={movie}
+              layout={layout}
+              onAddToWatchlist={null}
+              onLog={onLog ? () => onLog(movie) : null}
+            />
+            <div className="watchlist-actions">
+              {onLog && (
+                <button type="button" className="watchlist-log-button" onClick={() => onLog(movie)}>
+                  Log
+                </button>
+              )}
+              <button type="button" className="watchlist-remove-button" onClick={() => onRemove(index)}>
                 Remove
               </button>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

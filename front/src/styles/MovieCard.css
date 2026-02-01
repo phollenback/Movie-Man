@@ -104,3 +104,24 @@
 .add-button-inline:hover {
   background: #444;
 }
+
+.log-button-inline {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  background: #555;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.log-button-inline:hover {
+  background: #666;
+}
+
+.movie-card--list .movie-card-actions {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
