@@ -26,6 +26,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Validate required secrets
+        run: |
+          if [ -z "${{ secrets.ENTRA_CLIENT_ID }}" ]; then
+            echo "::error::ENTRA_CLIENT_ID secret is not set. Add it in repo Settings → Secrets → Actions."
+            exit 1
+          fi
+
       - name: Log in to Azure
         uses: azure/login@v2
         with:
