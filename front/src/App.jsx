@@ -17,8 +17,9 @@ function movieKey(movie) {
 }
 
 function App() {
-  const { instance } = useMsal();
+  const { instance, accounts } = useMsal();
   const isAuthenticated = useIsAuthenticated();
+  const account = accounts[0];
   const [movies, setMovies] = useState([]);
   const [watchlist, setWatchlist] = useState([]);
   const [watched, setWatched] = useState([]);
@@ -31,12 +32,13 @@ function App() {
   const [dataLoading, setDataLoading] = useState(false);
 
   const getToken = useCallback(async () => {
-    const result = await instance.acquireTokenSilent(loginRequest);
+    if (!account) throw new Error('No account');
+    const result = await instance.acquireTokenSilent({ ...loginRequest, account });
     return result.idToken || result.accessToken;
-  }, [instance]);
+  }, [instance, account]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !account) return;
     let cancelled = false;
     setDataLoading(true);
     Promise.all([api.fetchWatchlist(getToken), api.fetchWatched(getToken)])
@@ -53,7 +55,7 @@ function App() {
         if (!cancelled) setDataLoading(false);
       });
     return () => { cancelled = true; };
-  }, [isAuthenticated, getToken]);
+  }, [isAuthenticated, account, getToken]);
 
   const moviesPerPage = viewMode === 'list' ? 12 : 8;
 
