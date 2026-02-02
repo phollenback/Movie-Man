@@ -6,7 +6,22 @@
 
 **_Most Recent Commit: Azure App Service + GitHub Actions CI/CD_**
 
-Deploy to Azure via push to `dev-azure`. Required GitHub secrets: `AZURE_CREDENTIALS`, `ENTRA_CLIENT_ID`, `OMDB_API_KEY`. This was a proof of concept that upgraded an old project in order to gain some hands on experience using key AWS services.
+Deploy to Azure via push to `dev-azure`. Required GitHub secrets: `AZURE_CREDENTIALS`, `ENTRA_CLIENT_ID`, `OMDB_API_KEY`.
+
+**Logs / monitoring (movie-man-rg):** All monitoring is in the same resource group. **movieman-insights** (Application Insights) and **movieman-logs** (Log Analytics) store telemetry and logs.
+
+| Where | Purpose |
+|-------|---------|
+| **movieman** (web app) → Monitoring → Log stream | Live container stdout/stderr |
+| **movieman-insights** → Logs | Application Insights: `requests`, `traces`, `exceptions` |
+| **movieman-logs** → Logs | App Service logs: `AppRequests`, `AppTraces`, `AppServiceHTTPLogs`, `AppServiceConsoleLogs` |
+
+KQL examples in **movieman-logs** or **movieman-insights** → Logs:
+```
+AppRequests | take 50
+AppTraces | take 50
+AppServiceConsoleLogs | take 50
+```
 
 ⸻
 
