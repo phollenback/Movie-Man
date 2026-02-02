@@ -2,6 +2,8 @@
 .env
 .env.*
 !.env.example
+api/local.settings.json
+front/src/api/local.settings.json
 *-credentials.json
 *.pem
 secrets/

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useIsAuthenticated } from '@azure/msal-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useIsAuthenticated, useMsal } from '@azure/msal-react';
 import axios from 'axios';
 import Movie from './models/Movie';
 import MovieCard from './components/MovieCard';
@@ -8,6 +8,8 @@ import Watchlist from './components/Watchlist';
 import LogScreen from './components/LogScreen';
 import LogMovieForm from './components/LogMovieForm';
 import AuthButton from './components/AuthButton';
+import { loginRequest } from './authConfig';
+import * as api from './api/moviemanApi';
 import './styles/App.css';
 
 function movieKey(movie) {
@@ -15,6 +17,7 @@ function movieKey(movie) {
 }
 
 function App() {
+  const { instance } = useMsal();
   const isAuthenticated = useIsAuthenticated();
   const [movies, setMovies] = useState([]);
   const [watchlist, setWatchlist] = useState([]);
@@ -25,6 +28,32 @@ function App() {
   const [viewMode, setViewMode] = useState('grid');
   const [activeTab, setActiveTab] = useState('search');
   const [loggingMovie, setLoggingMovie] = useState(null);
+  const [dataLoading, setDataLoading] = useState(false);
+
+  const getToken = useCallback(async () => {
+    const result = await instance.acquireTokenSilent(loginRequest);
+    return result.idToken || result.accessToken;
+  }, [instance]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let cancelled = false;
+    setDataLoading(true);
+    Promise.all([api.fetchWatchlist(getToken), api.fetchWatched(getToken)])
+      .then(([wl, wd]) => {
+        if (!cancelled) {
+          setWatchlist(wl);
+          setWatched(wd);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) console.error('Failed to load watchlist/watched:', err);
+      })
+      .finally(() => {
+        if (!cancelled) setDataLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [isAuthenticated, getToken]);
 
   const moviesPerPage = viewMode === 'list' ? 12 : 8;
 
@@ -74,28 +103,48 @@ function App() {
   const paginatedMovies = movies.slice((clientPage - 1) * moviesPerPage, clientPage * moviesPerPage);
   const totalClientPages = Math.ceil(movies.length / moviesPerPage);
 
-  const addToWatchlist = (movie) => {
+  const addToWatchlist = async (movie) => {
     if (watchlist.some((m) => movieKey(m) === movieKey(movie))) return;
-    setWatchlist((prev) => [...prev, movie]);
+    try {
+      await api.addToWatchlist(movie, getToken);
+      setWatchlist((prev) => [...prev, movie]);
+    } catch (err) {
+      console.error('Failed to add to watchlist:', err);
+    }
   };
 
-  const removeFromWatchlist = (index) => {
-    setWatchlist((prev) => prev.filter((_, i) => i !== index));
+  const removeFromWatchlist = async (movie) => {
+    try {
+      await api.removeFromWatchlist(movieKey(movie), getToken);
+      setWatchlist((prev) => prev.filter((m) => movieKey(m) !== movieKey(movie)));
+    } catch (err) {
+      console.error('Failed to remove from watchlist:', err);
+    }
   };
 
-  const logMovie = (movie, logData = {}) => {
+  const logMovie = async (movie, logData = {}) => {
     if (watched.some((e) => movieKey(e.movie) === movieKey(movie))) return;
-    setWatched((prev) => [{ movie, comment: logData.comment, userRating: logData.userRating }, ...prev]);
-    setWatchlist((prev) => prev.filter((m) => movieKey(m) !== movieKey(movie)));
-    setLoggingMovie(null);
+    try {
+      await api.addToWatched({ movie, comment: logData.comment, userRating: logData.userRating }, getToken);
+      setWatched((prev) => [{ movie, comment: logData.comment, userRating: logData.userRating }, ...prev]);
+      setWatchlist((prev) => prev.filter((m) => movieKey(m) !== movieKey(movie)));
+      setLoggingMovie(null);
+    } catch (err) {
+      console.error('Failed to log movie:', err);
+    }
   };
 
   const handleLogSubmit = (logData) => {
     if (loggingMovie) logMovie(loggingMovie, logData);
   };
 
-  const removeFromLog = (index) => {
-    setWatched((prev) => prev.filter((_, i) => i !== index));
+  const removeFromLog = async (entry) => {
+    try {
+      await api.removeFromWatched(movieKey(entry.movie), getToken);
+      setWatched((prev) => prev.filter((e) => movieKey(e.movie) !== movieKey(entry.movie)));
+    } catch (err) {
+      console.error('Failed to remove from log:', err);
+    }
   };
 
   const isWatched = (movie) => watched.some((e) => movieKey(e.movie) === movieKey(movie));
@@ -140,6 +189,11 @@ function App() {
       <div className="app-main">
         {isAuthenticated ? (
         <div className="movies-container">
+          {dataLoading && (
+            <div className="loading-spinner-container">
+              <div className="loading-spinner" />
+            </div>
+          )}
           <div className="movies-toolbar">
             <span className="view-toggle">
               <button

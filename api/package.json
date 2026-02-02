@@ -1,0 +1,16 @@
+{
+  "name": "movieman-api",
+  "version": "1.0.0",
+  "description": "Movie-Man API for watchlist and watched",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "@azure/data-tables": "^13.3.0",
+    "jose": "^5.2.0"
+  },
+  "devDependencies": {
+    "azure-functions-core-tools": "^4.0.0"
+  }
+}

@@ -32,7 +32,7 @@ const Watchlist = ({ watchlist, layout, onRemove, onLog }) => {
                   Log
                 </button>
               )}
-              <button type="button" className="watchlist-remove-button" onClick={() => onRemove(index)}>
+              <button type="button" className="watchlist-remove-button" onClick={() => onRemove(movie)}>
                 Remove
               </button>
             </div>

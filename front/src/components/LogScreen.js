@@ -34,7 +34,7 @@ const LogScreen = ({ watched, layout, onRemove }) => {
             <button
               type="button"
               className="log-remove-button"
-              onClick={() => onRemove(index)}
+              onClick={() => onRemove(entry)}
               aria-label="Remove from log"
             >
               Remove

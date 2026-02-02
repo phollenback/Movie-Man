@@ -1,0 +1,13 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "<same as StorageConnectionString>",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "StorageConnectionString": "<paste from setup-table-storage.sh output>",
+    "ENTRA_CLIENT_ID": "<same as frontend REACT_APP_ENTRA_CLIENT_ID>",
+    "ENTRA_TENANT_ID": "common"
+  },
+  "Host": {
+    "CORS": "http://localhost:3000,http://localhost:8080"
+  }
+}

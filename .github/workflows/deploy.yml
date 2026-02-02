@@ -1,8 +1,8 @@
-# Deploy dev-azure to Azure App Service (movieman)
+# Deploy dev-azure to Azure
 # Trigger: push to dev-azure branch
-# Builds Docker image, pushes to ACR, deploys to App Service
+# Deploys: Frontend (App Service) + API (Azure Functions)
 
-name: Deploy to Azure App Service
+name: Deploy to Azure
 
 on:
   push:
@@ -11,6 +11,7 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: movieman
+  FUNCTIONS_APP_NAME: movieman-api
   RESOURCE_GROUP: movie-man-rg
   ACR_NAME: moviemanacr
   IMAGE_NAME: movie-man-front
@@ -29,7 +30,11 @@ jobs:
       - name: Validate required secrets
         run: |
           if [ -z "${{ secrets.ENTRA_CLIENT_ID }}" ]; then
-            echo "::error::ENTRA_CLIENT_ID secret is not set. Add it in repo Settings → Secrets → Actions."
+            echo "::error::ENTRA_CLIENT_ID secret is not set."
+            exit 1
+          fi
+          if [ -z "${{ secrets.OMDB_API_KEY }}" ]; then
+            echo "::error::OMDB_API_KEY secret is not set."
             exit 1
           fi
 
@@ -38,11 +43,21 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Deploy API (Azure Functions)
+        run: |
+          cd api
+          npm install --production
+          zip -r ../api.zip . -x "*.git*" -x "local.settings.json" -x "*.example"
+          az functionapp deployment source config-zip \
+            -g ${{ env.RESOURCE_GROUP }} \
+            -n ${{ env.FUNCTIONS_APP_NAME }} \
+            --src ../api.zip
+
       - name: Log in to ACR
         run: |
           az acr login --name ${{ env.ACR_NAME }}
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (frontend)
         run: |
           IMAGE_TAG=${{ github.sha }}
           IMAGE_URI=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:$IMAGE_TAG
@@ -53,12 +68,13 @@ jobs:
             --build-arg REACT_APP_ENTRA_CLIENT_ID=${{ secrets.ENTRA_CLIENT_ID }} \
             --build-arg REACT_APP_ENTRA_TENANT_ID=${{ secrets.ENTRA_TENANT_ID || 'common' }} \
             --build-arg REACT_APP_REDIRECT_URI=https://movieman.azurewebsites.net \
-            --build-arg REACT_APP_OMDB_API_KEY=${{ secrets.OMDB_API_KEY }}
+            --build-arg REACT_APP_OMDB_API_KEY=${{ secrets.OMDB_API_KEY }} \
+            --build-arg REACT_APP_API_URL=https://movieman-api.azurewebsites.net/api
           docker tag $IMAGE_URI ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
           docker push $IMAGE_URI
           docker push ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
 
-      - name: Deploy to App Service
+      - name: Deploy to App Service (frontend)
         run: |
           IMAGE_URI=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
           az webapp config container set \
