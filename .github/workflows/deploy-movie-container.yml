@@ -1,5 +1,5 @@
-# Deploy code to ACA (Container Apps) - infra already running
-# Trigger: workflow_dispatch only - deploys pushed code to existing ACA
+# CODE DEPLOY ONLY - no Terraform, no infra. Deploys API + frontend image to existing ACA.
+# Trigger: workflow_dispatch
 
 name: Deploy Movie-Container (ACA)
 
