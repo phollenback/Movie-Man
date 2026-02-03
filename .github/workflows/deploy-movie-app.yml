@@ -1,18 +1,10 @@
-# Deploy movie-app (App Service) to Azure
-# Trigger: push to main or workflow_dispatch
-# Deploys: Frontend (App Service) + API (Azure Functions)
+# Deploy code to App Service - infra already running
+# Trigger: workflow_dispatch
+# Same flow as old deploy.yml: checkout, deploy API, build/push image, update app
 
 name: Deploy Movie-App (App Service)
 
 on:
-  push:
-    branches:
-      - main
-      - dev-azure
-    paths:
-      - 'front/**'
-      - 'api/**'
-      - '.github/workflows/deploy-movie-app.yml'
   workflow_dispatch:
 
 env:
@@ -23,7 +15,7 @@ env:
   IMAGE_NAME: movie-man-front
 
 jobs:
-  validate-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -44,26 +36,10 @@ jobs:
             exit 1
           fi
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Validate Terraform (movie-app)
-        run: |
-          cd movie-app/terraform
-          terraform init -input=false
-          terraform validate
-
       - name: Log in to Azure
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Validate Azure resources exist
-        run: |
-          az group show --name ${{ env.RESOURCE_GROUP }} --output none || {
-            echo "::error::Resource group ${{ env.RESOURCE_GROUP }} not found. Run terraform apply first."
-            exit 1
-          }
 
       - name: Deploy API (Azure Functions)
         run: |
