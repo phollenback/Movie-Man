@@ -1,18 +1,10 @@
 # Deploy movie-container (ACA) to Azure
-# Trigger: push to main or workflow_dispatch
+# Trigger: workflow_dispatch only (manual) - infra already running
 # Deploys: Frontend (Container App) + API (Azure Functions)
 
 name: Deploy Movie-Container (ACA)
 
 on:
-  push:
-    branches:
-      - main
-      - dev-azure
-    paths:
-      - 'front/**'
-      - 'api/**'
-      - '.github/workflows/deploy-movie-container.yml'
   workflow_dispatch:
 
 env:
@@ -21,6 +13,7 @@ env:
   FUNCTIONS_APP_NAME: moviemanc-api
   ACR_NAME: moviemancacr
   IMAGE_NAME: movie-man-front
+  FRONTEND_URL: https://moviemanc.calmforest-70405e10.westus2.azurecontainerapps.io
 
 jobs:
   validate-and-deploy:
@@ -55,12 +48,18 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Validate Azure resources exist
+      - name: Validate ACA is running
         run: |
           az group show --name ${{ env.RESOURCE_GROUP }} --output none || {
             echo "::error::Resource group ${{ env.RESOURCE_GROUP }} not found. Run terraform apply first."
             exit 1
           }
+          STATUS=$(az containerapp show --name ${{ env.CONTAINER_APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --query "properties.provisioningState" -o tsv 2>/dev/null || echo "NotFound")
+          if [ "$STATUS" != "Succeeded" ]; then
+            echo "::error::Container App ${{ env.CONTAINER_APP_NAME }} not ready (status: $STATUS). Run terraform apply first."
+            exit 1
+          fi
+          echo "ACA is running, proceeding with code deploy."
 
       - name: Deploy API (Azure Functions)
         run: |
@@ -85,7 +84,7 @@ jobs:
             --build-arg REACT_APP_GIT_BRANCH=$BRANCH_NAME \
             --build-arg REACT_APP_ENTRA_CLIENT_ID=${{ secrets.ENTRA_CLIENT_ID }} \
             --build-arg REACT_APP_ENTRA_TENANT_ID=${{ secrets.ENTRA_TENANT_ID || 'common' }} \
-            --build-arg REACT_APP_REDIRECT_URI= \
+            --build-arg REACT_APP_REDIRECT_URI=${{ env.FRONTEND_URL }} \
             --build-arg REACT_APP_OMDB_API_KEY=${{ secrets.OMDB_API_KEY }} \
             --build-arg REACT_APP_API_URL=https://moviemanc-api.azurewebsites.net/api
           docker tag $IMAGE_URI ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
