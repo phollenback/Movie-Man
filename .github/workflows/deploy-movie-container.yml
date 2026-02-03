@@ -1,6 +1,5 @@
 # Deploy code to ACA (Container Apps) - infra already running
-# Trigger: workflow_dispatch
-# Same flow as old deploy.yml: checkout, deploy API, build/push image, update app
+# Trigger: workflow_dispatch only - deploys pushed code to existing ACA
 
 name: Deploy Movie-Container (ACA)
 
