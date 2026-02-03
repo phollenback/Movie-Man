@@ -1,3 +1,4 @@
+// Movie-Man – search, watchlist, log
 import React, { useState, useEffect, useCallback } from 'react';
 import { useIsAuthenticated, useMsal } from '@azure/msal-react';
 import axios from 'axios';
