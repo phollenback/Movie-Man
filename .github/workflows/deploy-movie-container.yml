@@ -1,9 +1,16 @@
 # CODE DEPLOY ONLY - no Terraform, no infra. Deploys API + frontend image to existing ACA.
-# Trigger: workflow_dispatch
+# Triggers: push to dev-azure, or manual Run workflow
 
 name: Deploy Movie-Container (ACA)
 
 on:
+  push:
+    branches:
+      - dev-azure
+    paths:
+      - 'front/**'
+      - 'api/**'
+      - '.github/workflows/deploy-movie-container.yml'
   workflow_dispatch:
 
 env:
