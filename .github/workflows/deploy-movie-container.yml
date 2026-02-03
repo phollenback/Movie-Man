@@ -1,4 +1,4 @@
-# CODE DEPLOY ONLY - no Terraform, no infra. Deploys frontend image to existing ACA.
+# CODE DEPLOY ONLY - no Terraform, no infra. Deploys API + frontend to existing ACA.
 # Triggers: push to dev-azure, or manual Run workflow
 
 name: Deploy Movie-Container (ACA)
@@ -9,12 +9,14 @@ on:
       - dev-azure
     paths:
       - 'front/**'
+      - 'api/**'
       - '.github/workflows/deploy-movie-container.yml'
   workflow_dispatch:
 
 env:
   RESOURCE_GROUP: movie-man-container-rg
   CONTAINER_APP_NAME: moviemanc
+  FUNCTIONS_APP_NAME: moviemanc-api
   ACR_NAME: moviemancacr
   IMAGE_NAME: movie-man-front
   FRONTEND_URL: https://moviemanc.calmforest-70405e10.westus2.azurecontainerapps.io

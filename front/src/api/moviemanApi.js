@@ -72,3 +72,16 @@ export async function removeFromWatched(movieKey, getToken) {
   );
   if (!res.ok && res.status !== 204) throw new Error(await res.text());
 }
+
+export async function reorderWatched(movieKey, direction, getToken) {
+  const token = await getToken();
+  const res = await fetch(`${getApiBase()}/watched`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ movieKey, direction }),
+  });
+  if (!res.ok) throw new Error(await res.text());
+}

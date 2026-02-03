@@ -20,14 +20,18 @@ module.exports = async function (context, req) {
       const entities = [];
       const iter = table.listEntities({ queryOptions: { filter: `PartitionKey eq '${oid}'` } });
       for await (const e of iter) {
+        const movie = JSON.parse(e.movie || '{}');
         entities.push({
-          movie: JSON.parse(e.movie || '{}'),
+          movie,
           comment: e.comment,
           userRating: e.userRating != null ? Number(e.userRating) : undefined,
+          movieKey: `${movie.title || ''}-${movie.year || ''}`,
+          _sort: Number(e.sortOrder || e.watchedAt || 0),
         });
       }
-      entities.sort((a, b) => (b.watchedAt || 0) - (a.watchedAt || 0));
-      context.res = { status: 200, body: entities };
+      entities.sort((a, b) => b._sort - a._sort);
+      const out = entities.map(({ _sort, ...rest }) => rest);
+      context.res = { status: 200, body: out };
       return;
     }
 
@@ -39,13 +43,15 @@ module.exports = async function (context, req) {
       }
       const movieKey = `${movie.title || ''}-${movie.year || ''}`;
       const safeKey = movieKey.replace(/[#\\?/]/g, '_');
+      const now = String(Date.now());
       await table.upsertEntity({
         partitionKey: oid,
         rowKey: safeKey,
         movie: JSON.stringify(movie),
         comment: comment || '',
         userRating: userRating != null ? String(userRating) : '',
-        watchedAt: String(Date.now()),
+        watchedAt: now,
+        sortOrder: now,
       });
       context.res = { status: 201, body: { ok: true } };
       return;
@@ -64,6 +70,51 @@ module.exports = async function (context, req) {
         if (e.statusCode !== 404) throw e;
       }
       context.res = { status: 204 };
+      return;
+    }
+
+    if (method === 'PATCH') {
+      const { movieKey: mk, direction } = req.body || {};
+      if (!mk || !['up', 'down'].includes(direction)) {
+        context.res = { status: 400, body: { error: 'movieKey and direction (up|down) required' } };
+        return;
+      }
+      const safeKey = String(mk).replace(/[#\\?/]/g, '_');
+      const raw = [];
+      const iter = table.listEntities({ queryOptions: { filter: `PartitionKey eq '${oid}'` } });
+      for await (const e of iter) {
+        raw.push({
+          ...e,
+          sortOrder: e.sortOrder || e.watchedAt || '0',
+        });
+      }
+      raw.sort((a, b) => Number(b.sortOrder) - Number(a.sortOrder));
+      const idx = raw.findIndex((e) => e.rowKey === safeKey);
+      if (idx < 0) {
+        context.res = { status: 404, body: { error: 'Movie not found in log' } };
+        return;
+      }
+      const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (swapIdx < 0 || swapIdx >= raw.length) {
+        context.res = { status: 200, body: { ok: true } };
+        return;
+      }
+      const [a, b] = [raw[idx], raw[swapIdx]];
+      const temp = a.sortOrder;
+      a.sortOrder = b.sortOrder;
+      b.sortOrder = temp;
+      const toEntity = (e) => ({
+        partitionKey: e.partitionKey,
+        rowKey: e.rowKey,
+        movie: e.movie,
+        comment: e.comment ?? '',
+        userRating: e.userRating ?? '',
+        watchedAt: e.watchedAt ?? '',
+        sortOrder: String(e.sortOrder),
+      });
+      await table.upsertEntity(toEntity(a));
+      await table.upsertEntity(toEntity(b));
+      context.res = { status: 200, body: { ok: true } };
       return;
     }
 

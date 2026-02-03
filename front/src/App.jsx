@@ -143,10 +143,28 @@ function App() {
 
   const removeFromLog = async (entry) => {
     try {
-      await api.removeFromWatched(movieKey(entry.movie), getToken);
-      setWatched((prev) => prev.filter((e) => movieKey(e.movie) !== movieKey(entry.movie)));
+      const mk = entry.movieKey || movieKey(entry.movie);
+      await api.removeFromWatched(mk, getToken);
+      setWatched((prev) => prev.filter((e) => (e.movieKey || movieKey(e.movie)) !== mk));
     } catch (err) {
       console.error('Failed to remove from log:', err);
+    }
+  };
+
+  const reorderLog = async (entry, direction) => {
+    const mk = entry.movieKey || movieKey(entry.movie);
+    const idx = watched.findIndex((e) => (e.movieKey || movieKey(e.movie)) === mk);
+    if (idx < 0) return;
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= watched.length) return;
+    const next = [...watched];
+    [next[idx], next[swapIdx]] = [next[swapIdx], next[idx]];
+    setWatched(next);
+    try {
+      await api.reorderWatched(mk, direction, getToken);
+    } catch (err) {
+      setWatched(watched);
+      console.error('Failed to reorder log:', err);
     }
   };
 
@@ -271,12 +289,14 @@ function App() {
               watched={watched}
               layout={viewMode}
               onRemove={removeFromLog}
+              onReorder={reorderLog}
             />
           )}
         </div>
         ) : (
           <div className="auth-prompt">
             <p>Sign in with Microsoft to search movies, manage your watchlist, and log what you&apos;ve watched.</p>
+            <p>Your watchlist and movie log are saved to your account and stay with you across sessions.</p>
           </div>
         )}
       </div>
