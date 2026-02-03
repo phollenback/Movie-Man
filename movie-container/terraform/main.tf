@@ -113,7 +113,7 @@ resource "azurerm_linux_function_app" "api" {
       node_version = "20"
     }
     cors {
-      allowed_origins     = concat(["https://${azurerm_container_app.frontend.latest_revision_fqdn}"], ["http://localhost:3000", "http://localhost:8080"])
+      allowed_origins     = [var.frontend_fqdn, "http://localhost:3000", "http://localhost:8080"]
       support_credentials = false
     }
     application_insights_connection_string = module.monitoring.app_insights_connection_string

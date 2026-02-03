@@ -32,3 +32,9 @@ variable "log_retention_days" {
   default     = 30
   description = "Log Analytics retention in days (cost: lower = cheaper)"
 }
+
+variable "frontend_fqdn" {
+  type        = string
+  default     = "https://moviemanc.calmforest-70405e10.westus2.azurecontainerapps.io"
+  description = "Frontend Container App FQDN for CORS (must match your deployment)"
+}
