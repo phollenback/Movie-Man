@@ -2,6 +2,18 @@
 .env
 .env.*
 !.env.example
+
+# Terraform
+movie-app/terraform/.terraform/
+movie-app/terraform/*.tfstate
+movie-app/terraform/*.tfstate.*
+movie-app/terraform/*.tfplan
+movie-app/terraform/terraform.tfvars
+movie-container/terraform/.terraform/
+movie-container/terraform/*.tfstate
+movie-container/terraform/*.tfstate.*
+movie-container/terraform/*.tfplan
+movie-container/terraform/terraform.tfvars
 api/local.settings.json
 front/src/api/local.settings.json
 *-credentials.json
@@ -24,4 +36,3 @@ Thumbs.db
 
 # Documentation
 docs/
-ENTRA_SETUP.md

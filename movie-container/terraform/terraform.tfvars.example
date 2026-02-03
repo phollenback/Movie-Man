@@ -1,0 +1,12 @@
+# Copy to terraform.tfvars and fill in values
+
+resource_group_name = "movie-man-container-rg"
+location            = "westus2"
+project_name        = "moviemanc"
+
+# Required - from your Entra app registration
+entra_client_id = "<your-entra-client-id>"
+entra_tenant_id = "common"
+
+# Optional - cost tuning (lower = cheaper)
+log_retention_days = 30
