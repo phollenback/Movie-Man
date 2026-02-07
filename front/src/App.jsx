@@ -271,6 +271,9 @@ function App() {
 
           {activeTab === 'search' && (
             <>
+              <div className="landing-area">
+                <p className="landing-tagline">Search, save, and log movies you&apos;ve watched.</p>
+              </div>
               <div className="search-inline">
                 <SearchForm onSearch={searchKey} />
               </div>

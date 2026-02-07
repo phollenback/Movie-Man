@@ -1,5 +1,5 @@
 # Push code to existing ACA. Terraform sets up infra.
-# Triggers: push to container-service (front/, api/), or manual
+# Triggers: any push to container-service (full API + app deploy), or manual
 
 name: Deploy Movie-Container (ACA)
 
@@ -7,10 +7,6 @@ on:
   push:
     branches:
       - container-service
-    paths:
-      - 'front/**'
-      - 'api/**'
-      - '.github/workflows/deploy-movie-container.yml'
   workflow_dispatch:
 
 concurrency:

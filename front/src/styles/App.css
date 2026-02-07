@@ -177,6 +177,18 @@ body {
   background: #444;
 }
 
+.landing-area {
+  margin-bottom: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #e8e8e4;
+}
+
+.landing-tagline {
+  margin: 0;
+  font-size: 1rem;
+  color: #555;
+}
+
 .search-inline {
   margin-bottom: 16px;
 }
