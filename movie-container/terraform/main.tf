@@ -137,6 +137,24 @@ resource "azurerm_linux_function_app" "api" {
   }
 }
 
+# Entra app redirect URIs - set before any deploy so auth works
+data "azuread_application" "entra" {
+  client_id = var.entra_client_id
+}
+
+resource "azuread_application_redirect_uris" "entra_spa" {
+  application_id = data.azuread_application.entra.id
+  type           = "SPA"
+
+  # Must match REACT_APP_REDIRECT_URI (workflow FRONTEND_URL) and window.location.origin
+  redirect_uris = [
+    var.frontend_fqdn,
+    "${var.frontend_fqdn}/",
+    "http://localhost:3000",
+    "http://localhost:3000/",
+  ]
+}
+
 # Diagnostic settings - Function App -> Log Analytics
 resource "azurerm_monitor_diagnostic_setting" "function" {
   name                       = "${var.project_name}-api-to-logs"

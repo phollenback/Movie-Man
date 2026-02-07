@@ -18,3 +18,15 @@ terraform import -var="entra_client_id=<your-id>" -var="entra_tenant_id=common" 
 ```
 
 Replace `<sub-id>` with your Azure subscription ID and `<your-id>` with your Entra client ID.
+
+## Import existing Entra SPA redirect URIs
+
+If the Entra app already has SPA redirect URIs (e.g. set manually), import before `terraform apply`:
+
+```bash
+terraform import -var="entra_client_id=<your-id>" -var="entra_tenant_id=common" \
+  azuread_application_redirect_uris.entra_spa \
+  "/applications/<app-object-id>/redirectUris/SPA"
+```
+
+Replace `<app-object-id>` with the application's object ID (from the error message or Azure Portal). Example from error: `27ba160a-5601-4ff2-998f-b92c59f242c5`.
