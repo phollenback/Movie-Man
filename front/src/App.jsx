@@ -175,7 +175,7 @@ function App() {
     <div className="app-container">
       <header className="app-header">
         <div className="app-header-left">
-          <h1>Movie Man</h1>
+          <h1>Movie Man</h1><i>by Digital Rev.</i>
           {isAuthenticated && (
             <nav className="main-nav">
               <button

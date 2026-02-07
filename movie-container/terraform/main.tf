@@ -37,6 +37,7 @@ resource "azurerm_container_app_environment" "main" {
 }
 
 # Container App - Frontend (replaces App Service)
+# Uses public bootstrap image initially; workflow deploys real image to ACR and updates via az containerapp update.
 resource "azurerm_container_app" "frontend" {
   name                         = var.project_name
   container_app_environment_id = azurerm_container_app_environment.main.id
@@ -60,7 +61,7 @@ resource "azurerm_container_app" "frontend" {
 
     container {
       name   = "frontend"
-      image  = "${module.registry.login_server}/movie-man-front:latest"
+      image  = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
       cpu    = 0.25
       memory = "0.5Gi"
 
@@ -88,6 +89,10 @@ resource "azurerm_container_app" "frontend" {
 
   identity {
     type = "SystemAssigned"
+  }
+
+  lifecycle {
+    ignore_changes = [template[0].container[0].image]
   }
 }
 
