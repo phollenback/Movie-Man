@@ -1,23 +1,25 @@
-# Push code to existing ACA. Terraform sets up infra.
-# Triggers: push to dev-azure (front/), or manual
+# Push code to existing App Service. Terraform sets up infra.
+# Triggers: push to app-service (front/), or manual
 
-name: Deploy Movie-Container (ACA)
+name: Deploy Movie-App (App Service)
 
 on:
   push:
     branches:
-      - container-service
+      - app-service
     paths:
       - 'front/**'
-      - '.github/workflows/deploy-movie-container.yml'
+      - 'api/**'
+      - '.github/workflows/deploy-movie-app.yml'
   workflow_dispatch:
 
 env:
-  RESOURCE_GROUP: movie-man-container-rg
-  CONTAINER_APP_NAME: moviemanc
-  ACR_NAME: moviemancacr
+  RESOURCE_GROUP: movie-man-app-rg
+  WEBAPP_NAME: movieman
+  FUNCTIONS_APP_NAME: movieman-api
+  ACR_NAME: moviemanacr
   IMAGE_NAME: movie-man-front
-  FRONTEND_URL: https://moviemanc.calmforest-70405e10.westus2.azurecontainerapps.io
+  FRONTEND_URL: https://movieman.azurewebsites.net
 
 jobs:
   deploy:
@@ -35,6 +37,16 @@ jobs:
         with:
           creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
 
+      - name: Deploy API
+        run: |
+          cd api
+          npm install --omit=dev
+          zip -r ../api.zip . -x "*.git*" -x "local.settings.json" -x "*.example"
+          az functionapp deployment source config-zip \
+            -g ${{ env.RESOURCE_GROUP }} \
+            -n ${{ env.FUNCTIONS_APP_NAME }} \
+            --src ../api.zip
+
       - name: Log in to ACR
         run: az acr login --name ${{ env.ACR_NAME }}
 
@@ -50,14 +62,14 @@ jobs:
             --build-arg REACT_APP_ENTRA_TENANT_ID=${{ secrets.ENTRA_TENANT_ID || 'common' }} \
             --build-arg REACT_APP_REDIRECT_URI=${{ env.FRONTEND_URL }} \
             --build-arg REACT_APP_OMDB_API_KEY=${{ secrets.OMDB_API_KEY }} \
-            --build-arg REACT_APP_API_URL=https://moviemanc-api.azurewebsites.net/api
+            --build-arg REACT_APP_API_URL=https://movieman-api.azurewebsites.net/api
           docker tag $IMAGE_URI ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
           docker push $IMAGE_URI
           docker push ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
 
-      - name: Update Container App
+      - name: Update Web App
         run: |
-          az containerapp update \
-            --name ${{ env.CONTAINER_APP_NAME }} \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --image ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          az webapp config container set \
+            -g ${{ env.RESOURCE_GROUP }} \
+            -n ${{ env.WEBAPP_NAME }} \
+            --docker-custom-image-name ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}

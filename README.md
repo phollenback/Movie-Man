@@ -2,61 +2,59 @@
 
 React frontend for searching movies, managing a watchlist, and logging what you've watched. Authenticates with Microsoft Entra ID. Backend: Azure Functions + Table Storage.
 
+**Primary deployment:** Azure Container Apps (ACA) — scale-to-zero, consumption pricing.
+
 ## Repo structure
 
 ```
 Movie-Man/
-├── front/                 # Shared React app
-├── api/                   # Shared Azure Functions API
+├── front/                 # React app
+├── api/                   # Azure Functions API
 ├── movie-app/
-│   └── terraform/         # App Service solution
-├── movie-container/
-│   └── terraform/         # ACA (Container Apps) solution
-└── scripts/
+│   └── terraform/         # App Service solution (optional)
+└── movie-container/
+    └── terraform/         # ACA solution (primary)
 ```
 
-## Solutions
+## Branch strategy
 
-| Solution | Frontend | Cost model |
-|----------|----------|------------|
-| **movie-app** | App Service (B1) | Fixed ~$13/mo |
-| **movie-container** | Azure Container Apps (Consumption) | Scale-to-zero, pay per use |
+| Branch | Role |
+|--------|------|
+| `dev-azure` | Development — no auto-deploy |
+| `container-service` | Deploys to ACA on push |
+| `app-service` | Deploys to App Service (optional) |
 
-Both use the same API (Azure Functions B1 + Table Storage).
+## Primary: ACA (Container Apps)
 
-## Spin up / down
+- **Resource group:** `movie-man-container-rg`
+- **Terraform:** `movie-container/terraform/`
 
 ```bash
-# movie-app (App Service)
-cd movie-app/terraform
-cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with entra_client_id
-terraform init && terraform apply
-
-# movie-container (ACA)
 cd movie-container/terraform
 cp terraform.tfvars.example terraform.tfvars
 # Edit terraform.tfvars with entra_client_id
 terraform init && terraform apply
 ```
 
-Spin down: `terraform destroy` in the respective directory.
+Spin down: `terraform destroy -var="entra_client_id=<id>" -var="entra_tenant_id=common"`
 
 ## CI/CD
 
-GitHub Actions deploy on push to `main` or `dev-azure` (when `front/`, `api/`, or workflows change):
+Push to `container-service` triggers deployment:
 
-- **deploy-movie-app.yml** – App Service + Functions (`movie-man-app-rg`)
-- **deploy-movie-container.yml** – Container Apps + Functions (`movie-man-container-rg`)
+- **deploy-movie-container.yml** — builds frontend image, pushes to ACR, updates Container App
 
-Required secrets: `AZURE_CREDENTIALS`, `ENTRA_CLIENT_ID`, `OMDB_API_KEY`.
+Required GitHub secrets: `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_SUBSCRIPTION_ID`, `AZURE_TENANT_ID`, `ENTRA_CLIENT_ID`, `ENTRA_TENANT_ID`, `OMDB_API_KEY`.
 
-## Local development
+## Optional: App Service
 
-See `docs/LOCAL_RUN.md` (local only, not in repo).
+- **Resource group:** `movie-man-app-rg`
+- **Terraform:** `movie-app/terraform/`
+
+Same flow: copy `terraform.tfvars.example` → `terraform.tfvars`, add `entra_client_id`, then `terraform init && terraform apply`.
 
 ## Prerequisites
 
-- Azure CLI, Terraform >= 1.0
-- Entra app registration with redirect URIs for your frontend URLs
+- Azure CLI, Terraform ≥ 1.0
+- Entra app registration with redirect URIs for frontend
 - OMDB API key

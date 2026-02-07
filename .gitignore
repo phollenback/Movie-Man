@@ -1,7 +1,13 @@
 # Azure / credentials
 .env
 .env.*
+.env.local
 !.env.example
+
+# Local scripts (use workflow for deploy)
+docker-build-local.sh
+**/docker-build-local.sh
+scripts/
 
 # Terraform
 movie-app/terraform/.terraform/

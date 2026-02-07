@@ -5,7 +5,7 @@ location            = "westus2"
 project_name        = "movieman"
 
 # Required - from your Entra app registration
-entra_client_id  = "0ff1c000-e120-4309-acb5-a9e90937765a"
+entra_client_id  = "<your-entra-client-id>"
 entra_tenant_id  = "common"
 
 # Optional - cost tuning (lower = cheaper)
