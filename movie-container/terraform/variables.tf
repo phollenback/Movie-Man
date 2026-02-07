@@ -35,6 +35,6 @@ variable "log_retention_days" {
 
 variable "frontend_fqdn" {
   type        = string
-  default     = "https://moviemanc.calmforest-70405e10.westus2.azurecontainerapps.io"
+  default     = "https://moviemanc.ambitioustree-615c59f1.westus2.azurecontainerapps.io"
   description = "Frontend Container App FQDN for CORS (must match your deployment)"
 }

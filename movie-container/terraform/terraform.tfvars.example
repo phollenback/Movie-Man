@@ -12,4 +12,4 @@ entra_tenant_id = "common"
 log_retention_days = 30
 
 # Optional - for CORS on Function App (default matches moviemanc deployment)
-# frontend_fqdn = "https://moviemanc.calmforest-70405e10.westus2.azurecontainerapps.io"
+# frontend_fqdn = "https://moviemanc.ambitioustree-615c59f1.westus2.azurecontainerapps.io"
