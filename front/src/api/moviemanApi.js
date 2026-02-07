@@ -85,3 +85,25 @@ export async function reorderWatched(movieKey, direction, getToken) {
   });
   if (!res.ok) throw new Error(await res.text());
 }
+
+export async function fetchUsers(getToken) {
+  const token = await getToken();
+  const res = await fetch(`${getApiBase()}/users`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function registerUser(getToken) {
+  const token = await getToken();
+  const res = await fetch(`${getApiBase()}/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: '{}',
+  });
+  if (!res.ok) throw new Error(await res.text());
+}

@@ -1,0 +1,38 @@
+.users-view {
+  padding: 24px 0;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.users-table th,
+.users-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.users-table th {
+  font-weight: 600;
+  color: #555;
+  background: #f8f8f8;
+}
+
+.users-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.users-loading,
+.users-error,
+.users-empty {
+  padding: 48px 24px;
+  text-align: center;
+  color: #666;
+}
+
+.users-error {
+  color: #b00;
+}

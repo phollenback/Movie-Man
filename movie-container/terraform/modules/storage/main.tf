@@ -16,3 +16,8 @@ resource "azurerm_storage_table" "watched" {
   name                 = "Watched"
   storage_account_name = azurerm_storage_account.main.name
 }
+
+resource "azurerm_storage_table" "users" {
+  name                 = "Users"
+  storage_account_name = azurerm_storage_account.main.name
+}

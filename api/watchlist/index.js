@@ -1,16 +1,18 @@
-const { getOidFromToken } = require('../src/shared/auth');
+const { getOidFromToken, getClaimsFromToken } = require('../src/shared/auth');
 const { getTableClient } = require('../src/shared/table');
+const { ensureUser } = require('../src/shared/users');
 
 module.exports = async function (context, req) {
-  const oid = await getOidFromToken(
-    req.headers?.authorization,
-    process.env.ENTRA_CLIENT_ID,
-    process.env.ENTRA_TENANT_ID || 'common'
-  );
+  const authHeader = req.headers?.authorization;
+  const clientId = process.env.ENTRA_CLIENT_ID;
+  const tenantId = process.env.ENTRA_TENANT_ID || 'common';
+  const oid = await getOidFromToken(authHeader, clientId, tenantId);
   if (!oid) {
     context.res = { status: 401, body: { error: 'Unauthorized' } };
     return;
   }
+  const claims = await getClaimsFromToken(authHeader, clientId, tenantId);
+  if (claims) ensureUser(claims).catch((e) => context.log.warn('ensureUser:', e.message));
 
   const table = getTableClient('Watchlist');
   const method = (req.method || '').toUpperCase();

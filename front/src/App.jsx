@@ -8,6 +8,7 @@ import SearchForm from './components/SearchForm';
 import Watchlist from './components/Watchlist';
 import LogScreen from './components/LogScreen';
 import LogMovieForm from './components/LogMovieForm';
+import Users from './components/Users';
 import AuthButton from './components/AuthButton';
 import { loginRequest } from './authConfig';
 import * as api from './api/moviemanApi';
@@ -31,6 +32,9 @@ function App() {
   const [activeTab, setActiveTab] = useState('search');
   const [loggingMovie, setLoggingMovie] = useState(null);
   const [dataLoading, setDataLoading] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState('');
 
   const getToken = useCallback(async () => {
     if (!account) throw new Error('No account');
@@ -42,6 +46,7 @@ function App() {
     if (!isAuthenticated || !account) return;
     let cancelled = false;
     setDataLoading(true);
+    api.registerUser(getToken).catch(() => {});
     Promise.all([api.fetchWatchlist(getToken), api.fetchWatched(getToken)])
       .then(([wl, wd]) => {
         if (!cancelled) {
@@ -57,6 +62,27 @@ function App() {
       });
     return () => { cancelled = true; };
   }, [isAuthenticated, account, getToken]);
+
+  useEffect(() => {
+    if (!isAuthenticated || activeTab !== 'users') return;
+    let cancelled = false;
+    setUsersLoading(true);
+    setUsersError('');
+    api.fetchUsers(getToken)
+      .then((list) => {
+        if (!cancelled) setUsers(list);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setUsersError(err.message || 'Failed to load users');
+          setUsers([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setUsersLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [isAuthenticated, activeTab, getToken]);
 
   const moviesPerPage = viewMode === 'list' ? 12 : 8;
 
@@ -199,6 +225,13 @@ function App() {
               >
                 Log {watched.length > 0 && ` (${watched.length})`}
               </button>
+              <button
+                type="button"
+                className={activeTab === 'users' ? 'active' : ''}
+                onClick={() => setActiveTab('users')}
+              >
+                Users
+              </button>
             </nav>
           )}
         </div>
@@ -291,6 +324,10 @@ function App() {
               onRemove={removeFromLog}
               onReorder={reorderLog}
             />
+          )}
+
+          {activeTab === 'users' && (
+            <Users users={users} loading={usersLoading} error={usersError} />
           )}
         </div>
         ) : (
