@@ -28,8 +28,13 @@ function App() {
   const [searchError, setSearchError] = useState('');
   const [clientPage, setClientPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewModeByTab, setViewModeByTab] = useState({
+    search: 'grid',
+    watchlist: 'grid',
+    log: 'list',
+  });
   const [activeTab, setActiveTab] = useState('search');
+  const viewMode = viewModeByTab[activeTab];
   const [loggingMovie, setLoggingMovie] = useState(null);
   const [dataLoading, setDataLoading] = useState(false);
   const [users, setUsers] = useState([]);
@@ -249,11 +254,12 @@ function App() {
             </div>
           )}
           <div className="movies-toolbar">
+            {(activeTab === 'search' || activeTab === 'watchlist' || activeTab === 'log') && (
             <span className="view-toggle">
               <button
                 type="button"
                 className={viewMode === 'grid' ? 'active' : ''}
-                onClick={() => setViewMode('grid')}
+                onClick={() => setViewModeByTab((prev) => ({ ...prev, [activeTab]: 'grid' }))}
                 aria-pressed={viewMode === 'grid'}
               >
                 Grid
@@ -261,12 +267,13 @@ function App() {
               <button
                 type="button"
                 className={viewMode === 'list' ? 'active' : ''}
-                onClick={() => setViewMode('list')}
+                onClick={() => setViewModeByTab((prev) => ({ ...prev, [activeTab]: 'list' }))}
                 aria-pressed={viewMode === 'list'}
               >
                 List
               </button>
             </span>
+            )}
           </div>
 
           {activeTab === 'search' && (
