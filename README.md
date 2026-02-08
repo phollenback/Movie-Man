@@ -2,19 +2,9 @@
 
 React frontend for searching movies, managing a watchlist, and logging what you've watched. Authenticates with Microsoft Entra ID. Backend: Azure Functions + Table Storage.
 
-**Primary deployment:** Azure Container Apps (ACA) — scale-to-zero, consumption pricing.
+This repo is a sandbox for AZ-104 preparation. There are two deployment versions, one with an Azure Web App managed service, and the one that is currently being hosted, Azure Container Apps (ACA).
 
-## Repo structure
-
-```
-Movie-Man/
-├── front/                 # React app
-├── api/                   # Azure Functions API
-├── movie-app/
-│   └── terraform/         # App Service solution (optional)
-└── movie-container/
-    └── terraform/         # ACA solution (primary)
-```
+test it out here: <i><a href="https://app.movie-manager.org">Movie Manager</a></i>
 
 ## Branch strategy
 
